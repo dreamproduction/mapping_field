@@ -1,0 +1,211 @@
+<?php
+
+/**
+ * @file
+ * Provides a mapping field, plus a formatter and widget for it.
+ */
+use Drupal\excel_import\Parser\PHPExcelParser;
+
+/**
+ * Implements hook_field_info().
+ */
+function mapping_field_field_info() {
+  $return = [];
+
+  $return['mapping_field'] = [
+    'label' => t('Mapping field'),
+    'description' => t('This field stores mapping information in the database.'),
+    'default_widget' => 'mapping_field_selector',
+    'default_formatter' => 'mapping_field_formatter',
+  ];
+
+  return $return;
+}
+
+
+/**
+ * Implements hook_field_widget_info().
+ */
+function mapping_field_field_widget_info() {
+  $return = [];
+
+  $return['mapping_field_selector'] = [
+    'label' => t('Mapping field selector'),
+    'field types' => ['mapping_field'],
+    'settings' => [],
+    'behaviors' => [
+      'multiple values' => FIELD_BEHAVIOR_DEFAULT,
+      'default value' => FIELD_BEHAVIOR_DEFAULT,
+    ],
+  ];
+
+  return $return;
+ }
+
+/**
+ * Implements hook_field_is_empty().
+ */
+function mapping_field_field_is_empty($item, $field) {
+  if (empty($item['source_plugin']) && empty($item['destination_pugin'])) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function mapping_field_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  static $cache;
+  switch ($instance['widget']['type']) {
+    case 'mapping_field_selector':
+      $args = $form_state['build_info']['args'];
+
+      if (isset($args[1]) && is_array($args[1])) {
+        $context = $args[1];
+
+        $destination_plugins = mapping_field_get_plugins('mapping_destination');
+        $element['destination_plugin'] = [
+          '#type' => 'select',
+          '#title' => t('Destination type'),
+          '#options' => ['_none' => t('Select a destination type')] + mapping_field_get_plugin_options($destination_plugins),
+        ];
+        foreach($destination_plugins as $plugin_name => $plugin) {
+          $plugin_instance = new $plugin['class']($context['destination']['entity_type'], $context['destination']['bundle']);
+          $default_value = isset($items[$delta]['destination_data'][$plugin_name]) ? $items[$delta]['destination_data'][$plugin_name] : NULL;
+          $field_name = format_string('!field_name[!langcode][!delta][destination_plugin]', [
+            '!field_name' => $field['field_name'],
+            '!langcode' => $langcode,
+            '!delta' => $delta,
+          ]);
+          $states = [
+            'visible' => [
+              'select[name="' . $field_name . '"]' => [['value' => $plugin_name]],
+            ]
+          ];
+          $element['destination_data'][$plugin_name] = $plugin_instance->getForm($default_value, $states);
+        }
+
+        $source_plugins = mapping_field_get_plugins('mapping_source');
+        $element['source_plugin'] = [
+          '#type' => 'select',
+          '#title' => t('Source type'),
+          '#options' => ['_none' => t('Select a source type')] + mapping_field_get_plugin_options($source_plugins),
+        ];
+        foreach($source_plugins as $plugin_name => $plugin) {
+          $plugin_instance = new $plugin['class']($context['header_file_uri']);
+          $default_value = isset($items[$delta]['source_data'][$plugin_name]) ? $items[$delta]['source_data'][$plugin_name] : NULL;
+          $field_name = format_string('!field_name[!langcode][!delta][source_plugin]', [
+            '!field_name' => $field['field_name'],
+            '!langcode' => $langcode,
+            '!delta' => $delta,
+          ]);
+          $states = [
+            'visible' => [
+              'select[name="' . $field_name . '"]' => [['value' => $plugin_name]],
+            ]
+          ];
+          $element['source_data'][$plugin_name] = $plugin_instance->getForm($default_value, $states);
+        }
+      }
+      break;
+  }
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function mapping_field_field_formatter_info() {
+  $return = [];
+
+  $return['mapping_field_formatter'] = [
+    'label' => t('Mapping field: Formatter'),
+    'field types' => ['mapping_field'],
+  ];
+
+  return $return;
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function mapping_field_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, &$items, $display) {
+  $settings = $display['settings'];
+
+  $element = [];
+  switch ($display['type']) {
+    case 'mapping_field_formatter':
+      foreach ($items as $item) {
+        // @TODO: display the items.
+      }
+      break;
+
+  }
+
+  return $element;
+}
+
+/**
+ * Implements hook_ctools_plugin_type().
+ */
+function mapping_field_ctools_plugin_type() {
+  $return = [];
+
+  $return['mapping_source'] = [
+    'cache' => TRUE,
+    'cache table' => 'cache',
+    'use hooks' => FALSE,
+    'classes' => ['class'],
+  ];
+
+  $return['mapping_destination'] = [
+    'cache' => TRUE,
+    'cache table' => 'cache',
+    'use hooks' => FALSE,
+    'classes' => ['class'],
+  ];
+
+  return $return;
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function mapping_field_ctools_plugin_directory($owner, $plugin_type) {
+  switch ("$owner:$plugin_type") {
+    case 'mapping_field:mapping_source':
+    case 'mapping_field:mapping_destination':
+      return "plugins/$owner/$plugin_type";
+  }
+
+  return NULL;
+}
+
+/**
+ * Get all mapping_destination plugins.
+ *
+ * @return mixed
+ */
+function mapping_field_get_plugins($type) {
+  ctools_include('plugins');
+  return ctools_get_plugins('mapping_field', $type);
+}
+
+/**
+ * Get a mapping_destination plugin.
+ *
+ * @return mixed
+ */
+function mapping_field_get_plugin($type, $plugin_name) {
+  ctools_include('plugins');
+  return ctools_get_plugins('mapping_field', $type, $plugin_name);
+}
+
+function mapping_field_get_plugin_options($plugins) {
+  $options = [];
+  foreach ($plugins as $plugin_name => $plugin) {
+    $options[$plugin_name] = $plugin['title'];
+  }
+  return $options;
+}

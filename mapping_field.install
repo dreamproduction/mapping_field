@@ -1,0 +1,46 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Mapping Field module.
+ */
+
+/**
+ * Implements hook_field_schema().
+ */
+function mapping_field_field_schema($field) {
+  $schema = NULL;
+
+  switch ($field['type']) {
+    case 'mapping_field':
+      $schema = [
+        'columns' => [
+          'source_plugin' => [
+            'type' => 'varchar',
+            'length' => 255,
+            'not null' => FALSE,
+          ],
+          'source_data' => [
+            'type' => 'blob',
+            'size' => 'normal',
+            'not null' => FALSE,
+            'serialize' => TRUE,
+          ],
+          'destination_plugin' => [
+            'type' => 'varchar',
+            'length' => 255,
+            'not null' => FALSE,
+          ],
+          'destination_data' => [
+            'type' => 'blob',
+            'size' => 'normal',
+            'not null' => FALSE,
+            'serialize' => TRUE,
+          ],
+        ],
+      ];
+      break;
+  }
+
+  return $schema;
+}

@@ -1,0 +1,8 @@
+name = Mapping Field
+description = A field for storing mapping information
+package = Excel Import
+core = 7.x
+version = 7.x-1.x
+
+;files[] =
+dependencies[] = xautoload
