@@ -7,8 +7,8 @@
  * @ingroup CToolsPlugin CToolsPluginMappingType
  */
 
-$plugin = array(
+$plugin = [
   'title' => t('Mapping destination: Fields'),
   'description' => t('Mapping plugin for fields destination.'),
   'class' => 'Drupal\mapping_field\MappingDestination\Field',
-);
+];

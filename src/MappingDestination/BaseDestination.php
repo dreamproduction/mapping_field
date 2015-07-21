@@ -13,4 +13,6 @@ abstract class BaseDestination {
   abstract function getForm($default_value, $states);
 
   abstract function setValue($wrapper, $value, $data);
+
+  abstract function getValue($wrapper, $data);
 }

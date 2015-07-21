@@ -5,7 +5,6 @@
 
 namespace Drupal\mapping_field\MappingDestination;
 
-
 class Field extends BaseDestination{
 
   protected $entity_type;
@@ -22,7 +21,7 @@ class Field extends BaseDestination{
     $this->setBundle($bundle);
   }
 
-  function getForm($default_value = '_none', $states) {
+  function getForm($default_value = ['field_name' => '_none', 'is_id_field' => FALSE], $states) {
     $instances = $this->getFields();
     $options = [];
 
@@ -33,12 +32,49 @@ class Field extends BaseDestination{
       }
     }
     return [
-      '#type' => 'select',
-      '#title' => t('Destination'),
-      '#options' => ['_none' => t('Select a field')] + $options,
-      '#default_value' => $default_value,
-      '#states' => $states,
+      'field_name' => [
+        '#type' => 'select',
+        '#title' => t('Destination'),
+        '#options' => ['_none' => t('Select a field')] + $options,
+        '#default_value' => $default_value['field_name'],
+        '#states' => $states,
+      ],
+      'is_id_field' => [
+        '#type' => 'checkbox',
+        '#title' => t('Is ID field'),
+        '#default_value' => $default_value['is_id_field'],
+        '#states' => $states,
+      ]
     ];
+  }
+
+  function setValue($wrapper, $value, $data) {
+    $field_name = $data['field_name'];
+    $wrapper->{$field_name}->set($value);
+  }
+
+  function getValue($wrapper, $data) {
+    return isset($wrapper->{$data['field_name']}) ? $wrapper->{$data['field_name']}->value() : NULL;
+  }
+
+  function isIdField($data) {
+    return $data['is_id_field'];
+  }
+
+  function addCondition(\EntityFieldQuery $efq, $data, $value){
+    $efq->fieldCondition($data['field_name'], 'value', $value);
+  }
+
+  protected function getFields() {
+    return field_info_instances($this->getEntityType(), $this->getBundle());
+  }
+
+  protected function getFieldInfo($field_name) {
+    return field_info_field($field_name);
+  }
+
+  protected function getSupportedFieldTypes() {
+    return ['text', 'number_integer', 'number_float', 'number_decimal'];
   }
 
   /**
@@ -68,21 +104,4 @@ class Field extends BaseDestination{
   protected function setEntityType($entity_type) {
     $this->entity_type = $entity_type;
   }
-
-  protected function getFields() {
-    return field_info_instances($this->getEntityType(), $this->getBundle());
-  }
-
-  protected function getFieldInfo($field_name) {
-    return field_info_field($field_name);
-  }
-
-  protected function getSupportedFieldTypes() {
-    return ['text', 'number_integer', 'number_float', 'number_decimal'];
-  }
-
-  function setValue($wrapper, $value, $field_name) {
-    $wrapper->{$field_name}->set($value);
-  }
-
 }
