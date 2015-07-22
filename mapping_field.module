@@ -4,7 +4,6 @@
  * @file
  * Provides a mapping field, plus a formatter and widget for it.
  */
-use Drupal\excel_import\Parser\PHPExcelParser;
 
 /**
  * Implements hook_field_info().
@@ -17,11 +16,114 @@ function mapping_field_field_info() {
     'description' => t('This field stores mapping information in the database.'),
     'default_widget' => 'mapping_field_selector',
     'default_formatter' => 'mapping_field_formatter',
+    'property_type' => 'mapping',
+    'property_callbacks' => ['mapping_property_info_callback'],
   ];
 
   return $return;
 }
 
+/**
+ * Callback to alter the property info of mapping fields.
+ *
+ * @see mapping_field_field_info().
+ */
+function mapping_property_info_callback(&$info, $entity_type, $field, $instance, $field_type) {
+  $name = $field['field_name'];
+  $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$name];
+
+  $property['type'] = ($field['cardinality'] != 1) ? 'list<mapping>' : 'mapping';
+  $property['getter callback'] = 'entity_metadata_field_verbatim_get';
+  $property['setter callback'] = 'entity_metadata_field_verbatim_set';
+  $property['auto creation'] = 'mapping_field_data_auto_creation';
+  $property['property info'] = mapping_field_data_property_info();
+
+  unset($property['query callback']);
+}
+
+/**
+ * Returns the default array structure for an mapping field for use when
+ * creating new data arrays through an entity metadata wrapper.
+ */
+function mapping_field_data_auto_creation() {
+  return ['source_plugin' => '_none', 'source_data' => [], 'destination_plugin' => '_none', 'destination_data' => []];
+}
+
+/**
+ * Defines info for the properties of the mapping field data structure.
+ */
+function mapping_field_data_property_info($name = NULL) {
+  return [
+    'source_plugin' => [
+      'label' => t('Source plugin name'),
+      'description' => !empty($name) ? t('The plugin name of the mapping source for %name', ['%name' => $name]) : '',
+      'type' => 'text',
+      'getter callback' => 'entity_property_verbatim_get',
+      'setter callback' => 'entity_property_verbatim_set',
+    ],
+    'destination_plugin' => [
+      'label' => t('Destination plugin name'),
+      'description' => !empty($name) ? t('The plugin name of the mapping destination for %name', ['%name' => $name]) : '',
+      'type' => 'text',
+      'getter callback' => 'entity_property_verbatim_get',
+      'setter callback' => 'entity_property_verbatim_set',
+    ],
+    'source_data' => [
+      'label' => t('Source mapping data'),
+      'description' => !empty($name) ? t('The data for the mapping source for %name', ['%name' => $name]) : '',
+      'type' => 'struct',
+      'getter callback' => 'entity_property_verbatim_get',
+      'setter callback' => 'entity_property_verbatim_set',
+    ],
+    'destination_data' => [
+      'label' => t('Destination mapping data'),
+      'description' => !empty($name) ? t('The data for the mapping destination for %name', ['%name' => $name]) : '',
+      'type' => 'struct',
+      'getter callback' => 'entity_property_verbatim_get',
+      'setter callback' => 'entity_property_verbatim_set',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_field_load().
+ */
+function mapping_field_field_load($entity_type, $entities, $field, $instances, $langcode, &$items, $age) {
+  if ($field['type'] == 'mapping_field') {
+    foreach ($entities as $id => $entity) {
+      foreach ($items[$id] as $delta => &$item) {
+        if (!empty($item['source_data'])) {
+          $item['source_data'] = unserialize($item['source_data']);
+        }
+        if (!empty($item['destination_data'])) {
+          $item['destination_data'] = unserialize($item['destination_data']);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_field_presave().
+ */
+function mapping_field_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  if ($field['type'] == 'mapping_field') {
+    foreach ($items as $delta => &$item) {
+      if (isset($item['source_data'])) {
+        $item['source_data'] = serialize($item['source_data']);
+      }
+      else {
+        $item['source_data'] = serialize([]);
+      }
+      if (isset($item['destination_data'])) {
+        $item['destination_data'] = serialize($item['destination_data']);
+      }
+      else {
+        $item['destination_data'] = serialize([]);
+      }
+    }
+  }
+}
 
 /**
  * Implements hook_field_widget_info().
@@ -46,7 +148,7 @@ function mapping_field_field_widget_info() {
  * Implements hook_field_is_empty().
  */
 function mapping_field_field_is_empty($item, $field) {
-  if (empty($item['source_plugin']) && empty($item['destination_pugin'])) {
+  if ($item['source_plugin'] == '_none' && $item['destination_plugin'] == '_none') {
     return TRUE;
   }
   return FALSE;
@@ -56,7 +158,6 @@ function mapping_field_field_is_empty($item, $field) {
  * Implements hook_field_widget_form().
  */
 function mapping_field_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
-  static $cache;
   switch ($instance['widget']['type']) {
     case 'mapping_field_selector':
       $args = $form_state['build_info']['args'];
@@ -69,6 +170,7 @@ function mapping_field_field_widget_form(&$form, &$form_state, $field, $instance
           '#type' => 'select',
           '#title' => t('Destination type'),
           '#options' => ['_none' => t('Select a destination type')] + mapping_field_get_plugin_options($destination_plugins),
+          '#default_value' => isset($items[$delta]['destination_plugin']) ? $items[$delta]['destination_plugin'] : '_none',
         ];
         foreach($destination_plugins as $plugin_name => $plugin) {
           $plugin_instance = new $plugin['class']($context['destination']['entity_type'], $context['destination']['bundle']);
@@ -91,6 +193,7 @@ function mapping_field_field_widget_form(&$form, &$form_state, $field, $instance
           '#type' => 'select',
           '#title' => t('Source type'),
           '#options' => ['_none' => t('Select a source type')] + mapping_field_get_plugin_options($source_plugins),
+          '#default_value' => isset($items[$delta]['source_plugin']) ? $items[$delta]['source_plugin'] : '_none',
         ];
         foreach($source_plugins as $plugin_name => $plugin) {
           $plugin_instance = new $plugin['class']($context['header_file_uri']);

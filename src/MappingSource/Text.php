@@ -8,7 +8,6 @@
 
 namespace Drupal\mapping_field\MappingSource;
 
-
 class Text extends BaseSource{
 
   function getForm($default_value = '', $states) {

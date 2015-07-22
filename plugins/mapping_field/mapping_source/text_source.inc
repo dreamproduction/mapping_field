@@ -7,8 +7,8 @@
  * @ingroup CToolsPlugin CToolsPluginMappingType
  */
 
-$plugin = array(
+$plugin = [
   'title' => t('Mapping source: Freetext'),
   'description' => t('Mapping plugin for freetext source.'),
   'class' => 'Drupal\mapping_field\MappingSource\Text',
-);
+];
