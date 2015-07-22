@@ -15,4 +15,9 @@ abstract class BaseDestination {
   abstract function setValue($wrapper, $value, $data);
 
   abstract function getValue($wrapper, $data);
+
+  abstract function addCondition(\EntityFieldQuery $efq, $data, $value);
+
+  abstract function isIdField($data);
+
 }
