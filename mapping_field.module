@@ -136,11 +136,35 @@ function mapping_field_field_formatter_view($entity_type, $entity, $field, $inst
   $element = [];
   switch ($display['type']) {
     case 'mapping_field_formatter':
-      foreach ($items as $item) {
-        // @TODO: display the items.
+      foreach ($items as $delta => $item) {
+        $plugin_name = $item['source_plugin'];
+        if ($plugin_name !== '_none') {
+          $plugin = mapping_field_get_plugin('mapping_source', $plugin_name);
+          $plugin_data = is_scalar($item['source_data'][$plugin_name]) ? $item['source_data'][$plugin_name] : json_encode($item['source_data'][$plugin_name]);
+          $element[$delta]['source'] = [
+            '#theme' => 'html_tag',
+            '#tag' => 'span',
+            '#value' => t('!plugin_label: !column', ['!plugin_label' => $plugin['title'], '!column' => $plugin_data]),
+            '#attributes' => [
+              'class' => ['source-mapping'],
+            ],
+          ];
+        }
+        $plugin_name = $item['destination_plugin'];
+        if ($plugin_name !== '_none') {
+          $plugin = mapping_field_get_plugin('mapping_destination', $plugin_name);
+          $plugin_data = is_scalar($item['destination_data'][$plugin_name]) ? $item['destination_data'][$plugin_name] : json_encode($item['destination_data'][$plugin_name]);
+          $element[$delta]['destination'] = [
+            '#theme' => 'html_tag',
+            '#tag' => 'span',
+            '#value' => t(' => !plugin_label: !field_name', ['!plugin_label' => $plugin['title'], '!field_name' => $plugin_data]),
+            '#attributes' => [
+              'class' => ['destination-mapping'],
+            ],
+          ];
+        }
       }
       break;
-
   }
 
   return $element;
