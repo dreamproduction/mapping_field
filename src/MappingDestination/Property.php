@@ -24,7 +24,7 @@ class Property extends BaseDestination{
   function getForm($default_value = ['property_name' => '_none', 'is_id_field' => FALSE], $states) {
     $properties = $this->getProperties();
     $options = [];
-    foreach ($properties as $property_name => $property) {
+    foreach ($properties as $property_name => $property_info) {
       $property_info = $this->getPropertyInfo($property_name);
       if (in_array($property_info['type'], $this->getSupportedPropertyTypes())) {
         $options[$property_name] = $property_info['label'];
@@ -65,8 +65,8 @@ class Property extends BaseDestination{
   }
 
   protected function getProperties() {
-    $entity_info = entity_get_info($this->getEntityType());
-    return $entity_info['base table field types'];
+    $entity_info = entity_get_property_info($this->getEntityType());
+    return $entity_info['properties'];
   }
 
   protected function getPropertyInfo($property_name) {
