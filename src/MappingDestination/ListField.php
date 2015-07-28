@@ -11,6 +11,6 @@ class ListField extends Field{
     parent::setValue($wrapper, $value, $data);
   }
   protected function getSupportedFieldTypes() {
-    return ['list_text', 'list_integer', 'list_float'];
+    return ['list_text', 'list_integer', 'list_float', 'list_boolean'];
   }
 }
