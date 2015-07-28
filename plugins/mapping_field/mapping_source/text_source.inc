@@ -2,13 +2,13 @@
 
 /**
  * @file
- * Plugin definition and callbacks for a mapping_field:mapping_type plugin.
+ * Plugin definition and callbacks for a mapping_field:mapping_source plugin.
  *
- * @ingroup CToolsPlugin CToolsPluginMappingType
+ * @ingroup CToolsPlugin CToolsPluginMappingSource
  */
 
 $plugin = [
-  'title' => t('Mapping source: Freetext'),
-  'description' => t('Mapping plugin for freetext source.'),
-  'class' => 'Drupal\mapping_field\MappingSource\Text',
+  'title' => t('Freetext excel mapping'),
+  'description' => t('Mapping plugin for selecting the source column by typing the column name.'),
+  'class' => 'Drupal\mapping_field\MappingSource\FreetextColumn',
 ];

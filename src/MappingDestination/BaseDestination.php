@@ -1,9 +1,6 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: calinmarian
- * Date: 7/20/15
- * Time: 00:35
+ * Contains Drupal\mapping_field\MappingDestination\BaseDestination;
  */
 
 namespace Drupal\mapping_field\MappingDestination;

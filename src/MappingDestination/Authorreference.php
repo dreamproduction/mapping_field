@@ -1,12 +1,12 @@
 <?php
 /**
- * Contains Drupal\mapping_field\MappingDestination\Entityreference;
+ * Contains Drupal\mapping_field\MappingDestination\Authorreference;
  */
 
 namespace Drupal\mapping_field\MappingDestination;
 
 
-class Authorreference extends Property{
+class Authorreference extends SimpleProperty {
 
   function getForm($default_value = ['field_name' => '_none', 'is_id_field' => FALSE], $states) {
     $properties = $this->getProperties();

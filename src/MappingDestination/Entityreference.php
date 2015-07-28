@@ -6,7 +6,7 @@
 namespace Drupal\mapping_field\MappingDestination;
 
 
-class Entityreference extends Field{
+class Entityreference extends SimpleField {
 
   function getForm($default_value = ['field_name' => '_none', 'is_id_field' => FALSE], $states) {
     $instances = $this->getFields();

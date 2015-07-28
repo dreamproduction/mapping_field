@@ -2,13 +2,13 @@
 
 /**
  * @file
- * Plugin definition and callbacks for a mapping_field:mapping_type plugin.
+ * Plugin definition and callbacks for a mapping_field:mapping_destination plugin.
  *
- * @ingroup CToolsPlugin CToolsPluginMappingType
+ * @ingroup CToolsPlugin CToolsPluginMappingDestination
  */
 
 $plugin = [
-  'title' => t('Mapping destination: Properties'),
-  'description' => t('Mapping plugin for properties destination.'),
-  'class' => 'Drupal\mapping_field\MappingDestination\Property',
+  'title' => t('Simple Entity Properties'),
+  'description' => t('Mapping plugin for simple properties destination.'),
+  'class' => 'Drupal\mapping_field\MappingDestination\SimpleProperty',
 ];

@@ -1,18 +1,18 @@
 <?php
 /**
- * Contains Drupal\mapping_field\MappingDestination\Field
+ * Contains Drupal\mapping_field\MappingDestination\SimpleField
  */
 
 namespace Drupal\mapping_field\MappingDestination;
 
-class Field extends BaseDestination{
+class SimpleField extends BaseDestination {
 
   protected $entity_type;
 
   protected $bundle;
 
   /**
-   * Field constructor.
+   * SimpleField constructor.
    * @param $entity_type
    * @param $bundle
    */
