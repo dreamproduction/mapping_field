@@ -39,7 +39,7 @@ class Authorreference extends SimpleProperty {
 
   function getValue(\EntityMetadataWrapper $wrapper, $data) {
     list($property_name, , , $ref_field_name) = explode('|', $data['reference_data']);
-    return isset($wrapper->{$property_name}->{$ref_field_name}) ? $wrapper->{$property_name}->{$ref_field_name}->value() : NULL;
+    return (isset($wrapper->{$property_name}) && isset($wrapper->{$property_name}->{$ref_field_name})) ? $wrapper->{$property_name}->{$ref_field_name}->value() : NULL;
   }
 
   function isIdField($data) {

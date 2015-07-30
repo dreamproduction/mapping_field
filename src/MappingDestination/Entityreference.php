@@ -50,7 +50,7 @@ class Entityreference extends SimpleField {
 
   function getValue(\EntityMetadataWrapper $wrapper, $data) {
     list($field_name, , , $ref_field_name) = explode('|', $data['reference_data']);
-    return isset($wrapper->{$field_name}->{$ref_field_name}) ? $wrapper->{$field_name}->{$ref_field_name}->value() : NULL;
+    return (isset($wrapper->{$field_name}) && isset($wrapper->{$field_name}->{$ref_field_name})) ? $wrapper->{$field_name}->{$ref_field_name}->value() : NULL;
   }
 
   function isIdField($data) {
