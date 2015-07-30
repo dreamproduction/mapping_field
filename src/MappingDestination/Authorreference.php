@@ -31,13 +31,13 @@ class Authorreference extends SimpleProperty {
     ];
   }
 
-  function setValue($wrapper, $value, $data) {
+  function setValue(\EntityMetadataWrapper $wrapper, $value, $data) {
     list($property_name, $entity_type, $bundle, $ref_field_name) = explode('|', $data['reference_data']);
     $uid = $this->getReferencedEntityId($entity_type, $bundle, $ref_field_name, $value);
     $wrapper->{$property_name}->set($uid);
   }
 
-  function getValue($wrapper, $data) {
+  function getValue(\EntityMetadataWrapper $wrapper, $data) {
     list($property_name, , , $ref_field_name) = explode('|', $data['reference_data']);
     return isset($wrapper->{$property_name}->{$ref_field_name}) ? $wrapper->{$property_name}->{$ref_field_name}->value() : NULL;
   }
