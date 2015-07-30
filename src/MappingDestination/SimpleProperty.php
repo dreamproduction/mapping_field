@@ -33,12 +33,12 @@ class SimpleProperty extends BaseDestination {
     ];
   }
 
-  function setValue($wrapper, $value, $data) {
+  function setValue(\EntityMetadataWrapper $wrapper, $value, $data) {
     $property_name = $data['property_name'];
     $wrapper->{$property_name}->set($value);
   }
 
-  function getValue($wrapper, $data) {
+  function getValue(\EntityMetadataWrapper $wrapper, $data) {
     return isset($wrapper->{$data['property_name']}) ? $wrapper->{$data['property_name']}->value() : NULL;
   }
 

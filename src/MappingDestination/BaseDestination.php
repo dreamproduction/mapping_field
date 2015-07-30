@@ -30,9 +30,9 @@ abstract class BaseDestination {
 
   abstract function getForm($default_value, $states);
 
-  abstract function setValue($wrapper, $value, $data);
+  abstract function setValue(\EntityMetadataWrapper $wrapper, $value, $data);
 
-  abstract function getValue($wrapper, $data);
+  abstract function getValue(\EntityMetadataWrapper $wrapper, $data);
 
   abstract function addCondition(\EntityFieldQuery $efq, $data, $value);
 

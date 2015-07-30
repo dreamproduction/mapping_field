@@ -34,12 +34,12 @@ class SimpleField extends BaseDestination {
     ];
   }
 
-  function setValue($wrapper, $value, $data) {
+  function setValue(\EntityMetadataWrapper $wrapper, $value, $data) {
     $field_name = $data['field_name'];
     $wrapper->{$field_name}->set($value);
   }
 
-  function getValue($wrapper, $data) {
+  function getValue(\EntityMetadataWrapper $wrapper, $data) {
     return isset($wrapper->{$data['field_name']}) ? $wrapper->{$data['field_name']}->value() : NULL;
   }
 

@@ -7,7 +7,7 @@ namespace Drupal\mapping_field\MappingDestination;
 
 class ListField extends SimpleField {
 
-  function setValue($wrapper, $value, $data) {
+  function setValue(\EntityMetadataWrapper $wrapper, $value, $data) {
     $value = trim($value);
     parent::setValue($wrapper, $value, $data);
   }

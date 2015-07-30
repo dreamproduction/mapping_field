@@ -42,13 +42,13 @@ class Entityreference extends SimpleField {
     ];
   }
 
-  function setValue($wrapper, $value, $data) {
+  function setValue(\EntityMetadataWrapper $wrapper, $value, $data) {
     list($field_name, $entity_type, $bundle, $ref_field_name) = explode('|', $data['reference_data']);
     $target_id = $this->getReferencedEntityId($entity_type, $bundle, $ref_field_name, $value);
     $wrapper->{$field_name}->set($target_id);
   }
 
-  function getValue($wrapper, $data) {
+  function getValue(\EntityMetadataWrapper $wrapper, $data) {
     list($field_name, , , $ref_field_name) = explode('|', $data['reference_data']);
     return isset($wrapper->{$field_name}->{$ref_field_name}) ? $wrapper->{$field_name}->{$ref_field_name}->value() : NULL;
   }

@@ -15,7 +15,7 @@ class UserDomain extends BaseDestination {
     return;
   }
 
-  function setValue($wrapper, $values, $data) {
+  function setValue(\EntityMetadataWrapper $wrapper, $values, $data) {
     // If the entity type is not user, we have nothing to do here.
     if ($this->getEntityType() !== 'user') {
       return;
@@ -43,7 +43,7 @@ class UserDomain extends BaseDestination {
     $user->domain_user = $values;
   }
 
-  function getValue($wrapper, $data) {
+  function getValue(\EntityMetadataWrapper $wrapper, $data) {
     // If the entity type is not user, we have nothing to do here.
     if ($this->getEntityType() !== 'user') {
       return;
