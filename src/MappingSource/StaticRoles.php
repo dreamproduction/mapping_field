@@ -12,12 +12,6 @@ namespace Drupal\mapping_field\MappingSource;
 class StaticRoles extends StaticValue {
 
   function getForm($default_value, $states) {
-    $options = $this->getDomainOptions();
-
-    if (empty($options)) {
-      return;
-    }
-
     return[
       '#type' => 'checkboxes',
       '#title' => t('Select roles'),
