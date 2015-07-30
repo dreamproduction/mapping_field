@@ -185,7 +185,9 @@ function mapping_field_field_widget_form(&$form, &$form_state, $field, $instance
               'select[name="' . $field_name . '"]' => [['value' => $plugin_name]],
             ]
           ];
-          $element['destination_data'][$plugin_name] = $plugin_instance->getForm($default_value, $states);
+          if ($plugin_form = $plugin_instance->getForm($default_value, $states)) {
+            $element['destination_data'][$plugin_name] = $plugin_form;
+          }
         }
 
         $source_plugins = mapping_field_get_plugins('mapping_source');
@@ -208,7 +210,9 @@ function mapping_field_field_widget_form(&$form, &$form_state, $field, $instance
               'select[name="' . $field_name . '"]' => [['value' => $plugin_name]],
             ]
           ];
-          $element['source_data'][$plugin_name] = $plugin_instance->getForm($default_value, $states);
+          if ($plugin_form = $plugin_instance->getForm($default_value, $states)) {
+            $element['source_data'][$plugin_name] = $plugin_form;
+          }
         }
       }
       break;

@@ -49,7 +49,7 @@ class TextFormat extends SimpleField {
 
   function setValue($wrapper, $value, $data) {
     $field_name = $data['field_name'];
-    $wrapper->{$field_name}->set(['value' => $value, 'format' => $data['format']);
+    $wrapper->{$field_name}->set(['value' => $value, 'format' => $data['format']]);
   }
 
 

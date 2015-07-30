@@ -7,20 +7,6 @@ namespace Drupal\mapping_field\MappingDestination;
 
 class SimpleField extends BaseDestination {
 
-  protected $entity_type;
-
-  protected $bundle;
-
-  /**
-   * SimpleField constructor.
-   * @param $entity_type
-   * @param $bundle
-   */
-  public function __construct($entity_type, $bundle) {
-    $this->setEntityType($entity_type);
-    $this->setBundle($bundle);
-  }
-
   function getForm($default_value = ['field_name' => '_none', 'is_id_field' => FALSE], $states) {
     $instances = $this->getFields();
     $options = [];
@@ -77,31 +63,4 @@ class SimpleField extends BaseDestination {
     return ['text', 'number_integer', 'number_float', 'number_decimal'];
   }
 
-  /**
-   * @return mixed
-   */
-  protected function getBundle() {
-    return $this->bundle;
-  }
-
-  /**
-   * @param mixed $bundle
-   */
-  protected function setBundle($bundle) {
-    $this->bundle = $bundle;
-  }
-
-  /**
-   * @return mixed
-   */
-  protected function getEntityType() {
-    return $this->entity_type;
-  }
-
-  /**
-   * @param mixed $entity_type
-   */
-  protected function setEntityType($entity_type) {
-    $this->entity_type = $entity_type;
-  }
 }
