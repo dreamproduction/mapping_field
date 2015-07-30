@@ -21,7 +21,8 @@ class StaticDomains extends StaticValue {
     return[
       '#type' => 'checkboxes',
       '#title' => t('Select domains'),
-      '#default_value' => ['-1' => t('Send to all affiliates')] + $this->getDomainOptions(),
+      '#options' => ['-1' => t('Send to all affiliates')] + $this->getDomainOptions(),
+      '#default_value' => $default_value,
       '#states' => $states,
     ];
   }
