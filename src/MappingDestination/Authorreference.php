@@ -102,7 +102,11 @@ class Authorreference extends SimpleProperty {
    * @return mixed
    */
   protected function createReferencedEntity($entity_type, $bundle, $field_name, $value) {
-    $properties = [];
+    // We can't create users with empty usernames, so we'll generate one
+    // randomly. This can be overwritten at a later time.
+    $properties = [
+      'name' => $this->getRandomUsername(),
+    ];
 
     // Create the entity.
     $entity = entity_create($entity_type, $properties);
@@ -137,5 +141,9 @@ class Authorreference extends SimpleProperty {
       }
     }
     return $options;
+  }
+
+  protected function getRandomUsername() {
+    return user_password($length = 30);
   }
 }
