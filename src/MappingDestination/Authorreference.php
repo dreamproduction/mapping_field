@@ -20,6 +20,10 @@ class Authorreference extends SimpleProperty {
       }
     }
 
+    if (!count($options)) {
+      return;
+    }
+
     return [
       'reference_data' => [
         '#type' => 'select',
@@ -32,12 +36,18 @@ class Authorreference extends SimpleProperty {
   }
 
   function setValue(\EntityMetadataWrapper $wrapper, $value, $data) {
+    if (!isset($data['reference_data']) || $data['reference_data'] == '_none') {
+      return;
+    }
     list($property_name, $entity_type, $bundle, $ref_field_name) = explode('|', $data['reference_data']);
     $uid = $this->getReferencedEntityId($entity_type, $bundle, $ref_field_name, $value);
     $wrapper->{$property_name}->set($uid);
   }
 
   function getValue(\EntityMetadataWrapper $wrapper, $data) {
+    if (!isset($data['reference_data']) || $data['reference_data'] == '_none') {
+      return;
+    }
     list($property_name, , , $ref_field_name) = explode('|', $data['reference_data']);
     return (isset($wrapper->{$property_name}) && isset($wrapper->{$property_name}->{$ref_field_name})) ? $wrapper->{$property_name}->{$ref_field_name}->value() : NULL;
   }
@@ -93,12 +103,6 @@ class Authorreference extends SimpleProperty {
    */
   protected function createReferencedEntity($entity_type, $bundle, $field_name, $value) {
     $properties = [];
-
-    // Set the bundle property, if it exists.
-    $bundle_key = $this->getBundleKey($entity_type);
-    if ($bundle_key) {
-      $properties[$bundle_key] = $bundle;
-    }
 
     // Create the entity.
     $entity = entity_create($entity_type, $properties);
