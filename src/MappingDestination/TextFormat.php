@@ -49,7 +49,7 @@ class TextFormat extends SimpleField {
 
   function setValue(\EntityMetadataWrapper $wrapper, $value, $data) {
     $field_name = $data['field_name'];
-    $wrapper->{$field_name}->value->set($value);
+    $wrapper->{$field_name}->set($value);
     $wrapper->{$field_name}->format->set($data['format']);
   }
 
