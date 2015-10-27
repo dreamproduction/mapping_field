@@ -49,8 +49,14 @@ class TextFormat extends SimpleField {
 
   function setValue(\EntityMetadataWrapper $wrapper, $value, $data) {
     $field_name = $data['field_name'];
-    $wrapper->{$field_name}->set($value);
-    $wrapper->{$field_name}->format->set($data['format']);
+    $instance = field_info_instance($wrapper->type(), $field_name, $wrapper->getBundle());
+    if ($instance['settings']['text_processing']) {
+      $wrapper->{$field_name}->value->set($value);
+      $wrapper->{$field_name}->format->set($data['format']);
+    }
+    else {
+      $wrapper->{$field_name}->set($value);
+    }
   }
 
 
