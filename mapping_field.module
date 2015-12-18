@@ -163,7 +163,34 @@ function mapping_field_field_widget_form(&$form, &$form_state, $field, $instance
       $args = $form_state['build_info']['args'];
 
       if (isset($args[1]) && is_array($args[1])) {
+        drupal_add_css(drupal_get_path('module', 'mapping_field') . '/css/mapping_field.css');
         $context = $args[1];
+
+        $source_plugins = mapping_field_get_plugins('mapping_source');
+        $element['source_plugin'] = [
+          '#type' => 'select',
+          '#title' => t('Source type'),
+          '#options' => ['_none' => t('Select a source type')] + mapping_field_get_plugin_options($source_plugins),
+          '#default_value' => isset($items[$delta]['source_plugin']) ? $items[$delta]['source_plugin'] : '_none',
+          '#prefix' => '<div class="mapping_source_section">',
+        ];
+        foreach($source_plugins as $plugin_name => $plugin) {
+          $plugin_instance = new $plugin['class']($context['header_file_uri']);
+          $default_value = isset($items[$delta]['source_data'][$plugin_name]) ? $items[$delta]['source_data'][$plugin_name] : NULL;
+          $field_name = format_string('!field_name[!langcode][!delta][source_plugin]', [
+            '!field_name' => $field['field_name'],
+            '!langcode' => $langcode,
+            '!delta' => $delta,
+          ]);
+          $states = [
+            'visible' => [
+              'select[name="' . $field_name . '"]' => [['value' => $plugin_name]],
+            ]
+          ];
+          if ($plugin_form = $plugin_instance->getForm($default_value, $states)) {
+            $element['source_data'][$plugin_name] = $plugin_form;
+          }
+        }
 
         $destination_plugins = mapping_field_get_plugins('mapping_destination');
         $element['destination_plugin'] = [
@@ -171,6 +198,8 @@ function mapping_field_field_widget_form(&$form, &$form_state, $field, $instance
           '#title' => t('Destination type'),
           '#options' => ['_none' => t('Select a destination type')] + mapping_field_get_plugin_options($destination_plugins),
           '#default_value' => isset($items[$delta]['destination_plugin']) ? $items[$delta]['destination_plugin'] : '_none',
+          '#prefix' => '</div><div class="mapping_destination_section">',
+          '#sufix' => '</div>',
         ];
         foreach($destination_plugins as $plugin_name => $plugin) {
           $plugin_instance = new $plugin['class']($context['destination']['entity_type'], $context['destination']['bundle']);
@@ -190,30 +219,6 @@ function mapping_field_field_widget_form(&$form, &$form_state, $field, $instance
           }
         }
 
-        $source_plugins = mapping_field_get_plugins('mapping_source');
-        $element['source_plugin'] = [
-          '#type' => 'select',
-          '#title' => t('Source type'),
-          '#options' => ['_none' => t('Select a source type')] + mapping_field_get_plugin_options($source_plugins),
-          '#default_value' => isset($items[$delta]['source_plugin']) ? $items[$delta]['source_plugin'] : '_none',
-        ];
-        foreach($source_plugins as $plugin_name => $plugin) {
-          $plugin_instance = new $plugin['class']($context['header_file_uri']);
-          $default_value = isset($items[$delta]['source_data'][$plugin_name]) ? $items[$delta]['source_data'][$plugin_name] : NULL;
-          $field_name = format_string('!field_name[!langcode][!delta][source_plugin]', [
-            '!field_name' => $field['field_name'],
-            '!langcode' => $langcode,
-            '!delta' => $delta,
-          ]);
-          $states = [
-            'visible' => [
-              'select[name="' . $field_name . '"]' => [['value' => $plugin_name]],
-            ]
-          ];
-          if ($plugin_form = $plugin_instance->getForm($default_value, $states)) {
-            $element['source_data'][$plugin_name] = $plugin_form;
-          }
-        }
       }
       break;
   }
