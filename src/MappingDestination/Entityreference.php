@@ -23,13 +23,15 @@ class Entityreference extends SimpleField {
         foreach ($bundles as $bundle => $bundle_label) {
           $bundle_options = $this->getBundleOptions($field_name, $entity_type, $bundle);
 
+          // Parse through all bundle field options and add them as options.
           if (count($bundle_options)) {
-            $key = $instance['label'] . ': ' . $bundle_label;
-            $options[$key] = $bundle_options;
+            $option_key = $instance['label'] . ': ' . $bundle_label;
+            $options[$option_key] = $bundle_options;
           }
         }
       }
     }
+
 
     return [
       'reference_data' => [
@@ -66,18 +68,29 @@ class Entityreference extends SimpleField {
    *
    * @param string $entity_type
    * @param string $bundle
-   * @param string $field_name
+   * @param string $field_name This can be either an entity field or property.
    * @param mixed $value
    * @return mixed
    * @throws \EntityMalformedException
    */
   protected function getReferencedEntityId($entity_type, $bundle, $field_name, $value) {
-    // Query to get the existing referenced entity.
+    // Query to get the existing referenced entity,
+    // based on the given field or property.
     $efq = new \EntityFieldQuery();
-    $result = $efq->entityCondition('entity_type', $entity_type)
-      ->entityCondition('bundle', $bundle)
-      ->fieldCondition($field_name, 'value', $value)
-      ->execute();
+    $efq->entityCondition('entity_type', $entity_type)
+      ->entityCondition('bundle', $bundle);
+
+    // Get the referenced entity properties.
+    $entity_info = entity_get_property_info($entity_type);
+    $referenced_entity_properties = $entity_info['properties'];
+    // Check if the field name is actually a field or property,
+    // and make the condition accordingly.
+    if (isset($referenced_entity_properties[$field_name])){
+      $efq->propertyCondition($field_name, $value);
+    }else{
+      $efq->fieldCondition($field_name, 'value', $value);
+    }
+    $result = $efq->execute();
 
     // If the query is successful, return the id of the first entity in the
     // result set.
@@ -117,7 +130,7 @@ class Entityreference extends SimpleField {
     // Get a metadata wrapper for the entity.
     $wrapper = entity_metadata_wrapper($entity_type, $entity);
 
-    // Set the id field's value.
+    // Set the id field / property value.
     $wrapper->{$field_name}->set($value);
 
     // Save the entity.
@@ -173,7 +186,7 @@ class Entityreference extends SimpleField {
   }
 
   /**
-   * Get the target field options for one bundle.
+   * Get the target field and property options for one bundle.
    *
    * @param string $reference_field_name
    * @param string $entity_type
@@ -182,6 +195,21 @@ class Entityreference extends SimpleField {
    */
   protected function getBundleOptions($reference_field_name, $entity_type, $bundle) {
     $options = [];
+
+    // Get properties.
+    $entity_info = entity_get_property_info($entity_type);
+    $properties = $entity_info['properties'];
+    foreach ($properties as $property_name => $property_info) {
+      $wrapper = entity_metadata_wrapper($this->getEntityType());
+      $property_info = isset($wrapper->{$property_name}) ? $wrapper->getPropertyInfo($property_name) : NULL;
+      // Leave only the Integer properties for now.
+      if (!empty($property_info) && in_array($property_info['type'], ['integer'])) {
+        $key = implode('|', [$reference_field_name, $entity_type, $bundle, $property_name]);
+        $options[$key] = $property_info['label'];
+      }
+    }
+
+    // Get Field Instances.
     $instances = field_info_instances($entity_type, $bundle);
     foreach ($instances as $field_name => $instance) {
       $field = field_info_field($field_name);
