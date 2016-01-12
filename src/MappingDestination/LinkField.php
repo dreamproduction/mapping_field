@@ -22,12 +22,7 @@ class LinkField extends SimpleField {
       }
     }
 
-    $formats = $this->getFilterFormats();
     $column_options = ['title' => t('Title'), 'url' => t('Url')];
-
-    foreach ($formats as $format_machine_name => $format) {
-      $format_options[$format_machine_name] = $format->name;
-    }
 
     return [
       'field_name' => [
