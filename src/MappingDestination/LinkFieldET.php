@@ -26,7 +26,7 @@ class LinkFieldET extends LinkField {
       '#type' => 'select',
       '#title' => t('Language'),
       '#options' => $language_options,
-      '#default_value' => $default_value['column'],
+      '#default_value' => $default_value['language'],
       '#states' => $states,
     ];
 
