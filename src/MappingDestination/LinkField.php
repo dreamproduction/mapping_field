@@ -44,7 +44,8 @@ class LinkField extends SimpleField {
 
   function setValue(\EntityMetadataWrapper $wrapper, $value, $data) {
     $field_name = $data['field_name'];
-    $wrapper->{$field_name}->{$data['column']}->set($value);
+    $encoded_value = $this->urlencode($value);
+    $wrapper->{$field_name}->{$data['column']}->set($encoded_value);
   }
 
 
@@ -54,6 +55,15 @@ class LinkField extends SimpleField {
 
   protected function getSupportedFieldTypes() {
     return ['link_field'];
+  }
+
+  private function urlencode($value) {
+    $decoded = urldecode($value);
+    while ($decoded != $value) {
+      $value = $decoded;
+      $decoded = urldecode($value);
+    }
+    return urlencode($value);
   }
 
 }
