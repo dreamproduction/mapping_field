@@ -57,13 +57,82 @@ class LinkField extends SimpleField {
     return ['link_field'];
   }
 
-  private function urlencode($value) {
+  /**
+   * @param string $url
+   * @return string
+   */
+  private function urlEncode($url) {
+    $decoded = $this->urlDecode($url);
+    $parsed_url = parse_url($decoded);
+    return $this->urlAssemble($parsed_url);
+  }
+
+  private function urlDecode($value) {
     $decoded = urldecode($value);
     while ($decoded != $value) {
       $value = $decoded;
       $decoded = urldecode($value);
     }
-    return urlencode($value);
+    return $value;
+  }
+
+  private function urlAssemble($parsed_url) {
+    $return = '';
+
+    // Add the scheme.
+    if (isset($parsed_url['scheme'])) {
+      $return .= rawurlencode($parsed_url['scheme']) . '://';
+    }
+    elseif (isset($parsed_url['host'])) {
+      $return .= '//';
+    }
+
+    // Add the user.
+    if (isset($parsed_url['user'])) {
+      $return .= rawurlencode($parsed_url['user']);
+    }
+
+    // Add the pass.
+    if (isset($parsed_url['pass'])) {
+      $return .= ':' . rawurlencode($parsed_url['pass']);
+    }
+
+    // If user or pass, add @.
+    if (isset($parsed_url['user']) || isset($parsed_url['pass'])) {
+      $return .= '@';
+    }
+
+    // Add the host.
+    if (isset($parsed_url['host'])) {
+      $return .= rawurlencode($parsed_url['host']);
+    }
+
+    // Add the port.
+    if (isset($parsed_url['port'])) {
+      $return .= ':' . rawurlencode($parsed_url['port']);
+    }
+
+    // Add the path.
+    if (isset($parsed_url['path'])) {
+      $path_parts = explode('/', $parsed_url['path']);
+      foreach ($path_parts as $key => $path_part) {
+        $path_parts[$key] = rawurlencode($path_part);
+      }
+      $return .= implode('/', $path_parts);
+    }
+
+    // Add the query.
+    if (isset($parsed_url['query'])) {
+      parse_str($parsed_url['query'], $query);
+      $return .= '?' . http_build_query($query);
+    }
+
+    // Add the fragment.
+    if (isset($parsed_url['fragment'])) {
+      $return .= '#' . urlencode($parsed_url['fragment']);
+    }
+
+    return $return;
   }
 
 }
