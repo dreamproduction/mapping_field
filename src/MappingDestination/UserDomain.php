@@ -53,7 +53,7 @@ class UserDomain extends BaseDestination {
     return $user->domain_user;
   }
 
-  function addCondition(\EntityFieldQuery $efq, $data, $value) {
+  function addCondition(\EntityFieldQuery $efq, $data, $value, $operator = NULL) {
     return;
   }
 

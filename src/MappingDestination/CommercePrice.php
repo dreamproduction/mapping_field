@@ -56,7 +56,7 @@ class CommercePrice extends BaseDestination {
     return $data['is_id_field'];
   }
 
-  function addCondition(\EntityFieldQuery $efq, $data, $value) {
+  function addCondition(\EntityFieldQuery $efq, $data, $value, $operator = NULL) {
     return;
   }
 

@@ -34,7 +34,7 @@ abstract class BaseDestination {
 
   abstract function getValue(\EntityMetadataWrapper $wrapper, $data);
 
-  abstract function addCondition(\EntityFieldQuery $efq, $data, $value);
+  abstract function addCondition(\EntityFieldQuery $efq, $data, $value, $operator);
 
   abstract function isIdField($data);
 

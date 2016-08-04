@@ -11,4 +11,5 @@ $plugin = [
   'title' => t('Static domains'),
   'description' => t('Mapping plugin for using static domains as source.'),
   'class' => 'Drupal\mapping_field\MappingSource\StaticDomains',
+  'static' => true,
 ];

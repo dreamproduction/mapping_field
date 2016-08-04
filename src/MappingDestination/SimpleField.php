@@ -47,8 +47,8 @@ class SimpleField extends BaseDestination {
     return $data['is_id_field'];
   }
 
-  function addCondition(\EntityFieldQuery $efq, $data, $value){
-    $efq->fieldCondition($data['field_name'], 'value', $value);
+  function addCondition(\EntityFieldQuery $efq, $data, $value, $operator = NULL){
+    $efq->fieldCondition($data['field_name'], 'value', $value, $operator);
   }
 
   protected function getFields() {

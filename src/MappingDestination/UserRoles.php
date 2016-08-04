@@ -47,7 +47,7 @@ class UserRoles extends BaseDestination {
     return $user->roles;
   }
 
-  function addCondition(\EntityFieldQuery $efq, $data, $value) {
+  function addCondition(\EntityFieldQuery $efq, $data, $value, $operator = NULL) {
     return;
   }
 
