@@ -1,13 +1,13 @@
 <?php
 /**
- * Contains Drupal\mapping_field\MappingDestination\SimpleField
+ * Contains Drupal\mapping_field\MappingDestination\CommercePrice
  */
 
 namespace Drupal\mapping_field\MappingDestination;
 
-class SimpleField extends BaseDestination {
+class CommercePrice extends BaseDestination {
 
-  function getForm($default_value = ['field_name' => '_none', 'is_id_field' => FALSE], $states) {
+  function getForm($default_value = ['field_name' => '_none'], $states) {
     $instances = $this->getFields();
     $options = [];
 
@@ -24,31 +24,40 @@ class SimpleField extends BaseDestination {
         '#options' => ['_none' => t('Select a field')] + $options,
         '#default_value' => $default_value['field_name'],
         '#states' => $states,
-      ],
-      'is_id_field' => [
-        '#type' => 'checkbox',
-        '#title' => t('Is ID field'),
-        '#default_value' => $default_value['is_id_field'],
-        '#states' => $states,
       ]
     ];
   }
 
+  /**
+   * @param \EntityMetadataWrapper $wrapper
+   * @param $value
+   * @param $data
+   */
   function setValue(\EntityMetadataWrapper $wrapper, $value, $data) {
+    $value = commerce_currency_decimal_to_amount($value, $this->getCurrency());
     $field_name = $data['field_name'];
-    $wrapper->{$field_name}->set($value);
+    $price_array = [
+      'amount' => $value,
+      'currency_code' => $this->getCurrency()
+    ];
+    $price_array['data'] = commerce_price_component_add($price_array, 'base_price', $price_array, TRUE);
+    $wrapper->{$field_name}->set($price_array);
   }
 
   function getValue(\EntityMetadataWrapper $wrapper, $data) {
-    return isset($wrapper->{$data['field_name']}) ? $wrapper->{$data['field_name']}->value() : NULL;
+    if (!isset($wrapper->{$data['field_name']})) {
+      return;
+    }
+    $amount = $wrapper->{$data['field_name']}->amount->value();
+    return commerce_currency_amount_to_decimal($amount, $this->getCurrency());
   }
 
   function isIdField($data) {
     return $data['is_id_field'];
   }
 
-  function addCondition(\EntityFieldQuery $efq, $data, $value, $operator = NULL){
-    $efq->fieldCondition($data['field_name'], 'value', $value, $operator);
+  function addCondition(\EntityFieldQuery $efq, $data, $value, $operator = NULL) {
+    return;
   }
 
   protected function getFields() {
@@ -60,7 +69,12 @@ class SimpleField extends BaseDestination {
   }
 
   protected function getSupportedFieldTypes() {
-    return ['text', 'number_integer', 'number_float', 'number_decimal'];
+    return ['commerce_price'];
+  }
+
+  private function getCurrency() {
+    return  commerce_default_currency();
   }
 
 }
+

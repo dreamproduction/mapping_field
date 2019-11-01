@@ -46,8 +46,8 @@ class SimpleProperty extends BaseDestination {
     return $data['is_id_property'];
   }
 
-  function addCondition(\EntityFieldQuery $efq, $data, $value){
-    $efq->propertyCondition($data['property_name'], $value);
+  function addCondition(\EntityFieldQuery $efq, $data, $value, $operator = NULL){
+    $efq->propertyCondition($data['property_name'], $value, $operator);
   }
 
   protected function getProperties() {

@@ -11,4 +11,5 @@ $plugin = [
   'title' => t('Static value'),
   'description' => t('Mapping plugin for using a static value as source.'),
   'class' => 'Drupal\mapping_field\MappingSource\StaticValue',
+  'static' => true,
 ];

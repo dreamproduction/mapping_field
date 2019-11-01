@@ -1,0 +1,25 @@
+
+#field-mapping-values .mapping_source_section {
+	float: left;
+	padding: 0 0.5% 0.5%;
+    width: 48.5%;
+    min-width: 520px;
+}
+
+#field-mapping-values .mapping_destination_section {
+	float: left;
+	padding: 0 0.5% 0.5%;
+    width: 48.5%;
+    min-width: 520px;
+}
+
+#field-mapping-values .form-item {
+	float: left;
+	display: inline-block;
+	margin-right: 5px;
+	min-height: 50px;
+}
+
+#field-mapping-values .mapping_destination_section .form-type-checkbox {
+	padding-top: 22px;
+}

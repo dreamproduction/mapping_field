@@ -1,12 +1,15 @@
 <?php
 /**
- * Contains Drupal\mapping_field\MappingDestination\Entityreference;
+ * Created by PhpStorm.
+ * User: calinmarian
+ * Date: 12/23/15
+ * Time: 18:18
  */
 
 namespace Drupal\mapping_field\MappingDestination;
 
 
-class Entityreference extends SimpleField {
+class CommerceProductReference extends SimpleField {
 
   function getForm($default_value = ['reference_data' => '_none'], $states) {
     $instances = $this->getFields();
@@ -15,10 +18,9 @@ class Entityreference extends SimpleField {
     foreach ($instances as $field_name => $instance) {
       $field = $this->getFieldInfo($field_name);
       if ($field['cardinality'] == 1 && in_array($field['type'], $this->getSupportedFieldTypes())) {
-        $field_info = field_info_field($field_name);
-        $entity_type = $field_info['settings']['target_type'];
+        $entity_type = 'commerce_product';
 
-        $bundles = $this->getBundles($field_name);
+        $bundles = $this->getBundles();
 
         foreach ($bundles as $bundle => $bundle_label) {
           $bundle_options = $this->getBundleOptions($field_name, $entity_type, $bundle);
@@ -31,7 +33,6 @@ class Entityreference extends SimpleField {
         }
       }
     }
-
 
     return [
       'reference_data' => [
@@ -47,7 +48,9 @@ class Entityreference extends SimpleField {
   function setValue(\EntityMetadataWrapper $wrapper, $value, $data) {
     list($field_name, $entity_type, $bundle, $ref_field_name) = explode('|', $data['reference_data']);
     $target_id = $this->getReferencedEntityId($entity_type, $bundle, $ref_field_name, $value);
-    $wrapper->{$field_name}->set($target_id);
+    if ($target_id) {
+      $wrapper->{$field_name}->set($target_id);
+    }
   }
 
   function getValue(\EntityMetadataWrapper $wrapper, $data) {
@@ -60,7 +63,7 @@ class Entityreference extends SimpleField {
   }
 
   protected function getSupportedFieldTypes() {
-    return ['entityreference'];
+    return ['commerce_product_reference'];
   }
 
   /**
@@ -77,8 +80,7 @@ class Entityreference extends SimpleField {
     // Query to get the existing referenced entity,
     // based on the given field or property.
     $efq = new \EntityFieldQuery();
-    $efq->entityCondition('entity_type', $entity_type)
-      ->entityCondition('bundle', $bundle);
+    $efq->entityCondition('entity_type', $entity_type);
 
     // Get the referenced entity properties.
     $entity_info = entity_get_property_info($entity_type);
@@ -98,88 +100,18 @@ class Entityreference extends SimpleField {
       $ids = array_keys($result[$entity_type]);
       return reset($ids);
     }
-
-    // Otherwise, create an entity with the required external id.
-    $entity = $this->createReferencedEntity($entity_type, $bundle, $field_name, $value);
-    list($id, , ) = entity_extract_ids($entity_type, $entity);
-
-    return $id;
   }
 
   /**
-   * Create and return a target entity for a reference field.
+   * Get all the target bundles for an commerce_product_reference field.
    *
-   * @param string $entity_type
-   * @param string $bundle
-   * @param string $field_name
-   * @param $value
-   * @return mixed
-   */
-  protected function createReferencedEntity($entity_type, $bundle, $field_name, $value) {
-    $properties = [];
-
-    // Set the bundle property, if it exists.
-    $bundle_key = $this->getBundleKey($entity_type);
-    if ($bundle_key) {
-      $properties[$bundle_key] = $bundle;
-    }
-
-    // Create the entity.
-    $entity = entity_create($entity_type, $properties);
-
-    // Get a metadata wrapper for the entity.
-    $wrapper = entity_metadata_wrapper($entity_type, $entity);
-
-    // Set the id field / property value.
-    $wrapper->{$field_name}->set($value);
-
-    // Save the entity.
-    $wrapper->save();
-
-    return $entity;
-  }
-
-  /**
-   * Get the bundle key for a specific entity type.
-   *
-   * @param string $entity_type
-   * @return string
-   */
-  protected function getBundleKey($entity_type) {
-    $entity_info = entity_get_info($entity_type);
-    return isset($entity_info['entity keys']['bundle']) ? $entity_info['entity keys']['bundle'] : NULL;
-  }
-
-  /**
-   * Get all the target bundles for an entityreference field.
-   *
-   * @param string $field_name
    * @return array
    */
-  protected function getBundles($field_name) {
-    // Load field info.
-    $field_info = field_info_field($field_name);
-
-    // Get the target entity type.
-    $entity_type = $field_info['settings']['target_type'];
-
+  protected function getBundles() {
     // Load the entity info for the target entity type.
-    $entity_info = entity_get_info($entity_type);
-
-    // If the handler type is "base", the target bundles are stored as settings
-    // on the field info, we get them from there.
-    if (isset($field_info['settings']['handler']) && $field_info['settings']['handler'] == 'base') {
-      foreach ($field_info['settings']['handler_settings']['target_bundles'] as $bundle_name) {
-        $bundles[$bundle_name] = $entity_info['bundles'][$bundle_name]['label'];
-      }
-    }
-
-    // If we have no targer bundles set, it means all the bundles can be target
-    // bundles.
-    if (empty($bundles)) {
-      foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
-        $bundles[$bundle_name] = $bundle_info['label'];
-      }
+    $entity_info = entity_get_info('commerce_product');
+    foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
+      $bundles[$bundle_name] = $bundle_info['label'];
     }
 
     return $bundles;

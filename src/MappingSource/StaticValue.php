@@ -17,7 +17,7 @@ class StaticValue extends BaseSource {
     ];
   }
 
-  public static function getValue($row, $key) {
+  public static function getValue($row, $key, $import_file) {
     return $key;
   }
 

@@ -21,8 +21,9 @@ class StaticRoles extends StaticValue {
     ];
   }
 
-  public static function getValue($row, $data) {
+  public static function getValue($row, $data, $import_file) {
     $roles = static::getRolesOptions();
+
     $selected_roles = [];
     foreach ($data as $rid => $selected) {
       if ($selected) {
