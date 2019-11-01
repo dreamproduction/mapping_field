@@ -21,8 +21,8 @@ class StaticRoles extends StaticValue {
     ];
   }
 
-  function getValue($row, $data) {
-    $roles = $this->getRolesOptions();
+  public static function getValue($row, $data) {
+    $roles = static::getRolesOptions();
     $selected_roles = [];
     foreach ($data as $rid => $selected) {
       if ($selected) {
@@ -33,7 +33,7 @@ class StaticRoles extends StaticValue {
     return $selected_roles;
   }
 
-  protected function getRolesOptions() {
+  protected static function getRolesOptions() {
     return user_roles($membersonly = TRUE);
   }
 
